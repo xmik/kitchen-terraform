@@ -18,7 +18,7 @@ module Terraform
   # Group of Terraform server instances to be verified
   class Group
     def each_attribute(&block)
-      data[:attributes].each_pair(&block)
+      data[:attributes].dup.each_pair(&block)
     end
 
     def evaluate(verifier:)

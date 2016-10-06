@@ -29,20 +29,16 @@ module Kitchen
 
       kitchen_verifier_api_version 2
 
-      def add_targets(runner:)
-        collect_tests.each { |test| runner.add_target test }
-      end
-
       def call(state)
-        self.inspec_runner_options = runner_options transport, state
+        merge options: runner_options(transport, state)
         config[:groups].each { |group| group.evaluate verifier: self }
       end
 
       def execute
-        ::Terraform::InspecRunner.new(inspec_runner_options)
-                                 .tap do |inspec_runner|
-                                   inspec_runner.evaluate verifier: self
-                                 end
+        ::Inspec::Runner.new(inspec_runner_options).tap do |inspec_runner|
+          add_targets inspec_runner: inspec_runner
+          verify inspec_runner: inspec_runner
+        end
       end
 
       def merge(options:)
@@ -51,7 +47,7 @@ module Kitchen
 
       def resolve_attributes(group:)
         group.each_attribute do |key, output_name|
-          group.store_attribute key: key,
+          group.store_attribute key: key.to_s,
                                 value: driver.output_value(name: output_name)
         end
       end
@@ -60,17 +56,24 @@ module Kitchen
         driver.output_value list: true, name: group.hostnames, &block
       end
 
-      def verify(exit_code:)
-        raise InstanceFailure, "Inspec Runner returns #{exit_code}" unless
-          exit_code.zero?
-      end
-
       private
 
       attr_accessor :inspec_runner_options
 
-      def load_needed_dependencies!
-        require 'terraform/inspec_runner'
+      def add_targets(inspec_runner:)
+        collect_tests.each { |test| inspec_runner.add_target test }
+      end
+
+      def initialize(conf = {}, inspec_runner_options: {})
+        super conf
+        self.inspec_runner_options = inspec_runner_options
+      end
+
+      def verify(inspec_runner:)
+        inspec_runner.run.tap do |exit_code|
+          raise InstanceFailure, "Inspec Runner returns #{exit_code}" unless
+            exit_code.zero?
+        end
       end
     end
   end
