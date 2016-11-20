@@ -14,31 +14,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'support/terraform/command_extender_examples'
-require 'support/terraform/zero_seven_output_examples'
-require 'support/terraform/zero_six_output_examples'
-require 'terraform/output_command'
+require 'terraform/show_command'
+require_relative 'command_with_input_file_examples'
+require_relative 'colored_command_examples'
 
-RSpec.describe Terraform::OutputCommand do
-  let :described_instance do
-    described_class.new list: list, version: version, state: state
+::RSpec.shared_examples ::Terraform::ShowCommand do
+  it_behaves_like 'colored command'
+
+  it_behaves_like ::Terraform::CommandWithInputFile
+
+  describe '#input_file' do
+    subject { described_instance.input_file }
+
+    it('is the target') { is_expected.to be described_instance.target }
   end
-
-  let(:list) { instance_double Object }
-
-  let(:state) { instance_double Object }
-
-  let(:version) { '' }
-
-  it_behaves_like Terraform::CommandExtender
-
-  it_behaves_like(Terraform::ZeroSevenOutput) { let(:version) { 'v0.7' } }
-
-  it_behaves_like(Terraform::ZeroSixOutput) { let(:version) { 'v0.6' } }
 
   describe '#name' do
     subject { described_instance.name }
 
-    it('returns "output"') { is_expected.to eq 'output' }
+    it('is "show"') { is_expected.to eq 'show' }
   end
 end
