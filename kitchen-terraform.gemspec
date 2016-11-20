@@ -1,24 +1,24 @@
 # frozen_string_literal: true
 
-File.expand_path('../lib', __FILE__).tap do |directory|
+::File.expand_path('../lib', __FILE__).tap do |directory|
   $LOAD_PATH.unshift directory unless $LOAD_PATH.include? directory
 end
 
-require 'terraform/version.rb'
+require 'terraform/project_version.rb'
 
-Gem::Specification.new do |specification|
+::Gem::Specification.new do |specification|
   specification.authors = [
     'Aaron Lane', 'Kevin Dickerson', 'Michael Glenney',
     'Nell Shamrell-Harrington', 'Nick Willever'
   ]
 
-  specification.files = Dir.glob '{lib/**/*.rb,LICENSE,README.md}'
+  specification.files = ::Dir.glob '{lib/**/*.rb,LICENSE,README.md}'
 
   specification.name = 'kitchen-terraform'
 
   specification.summary = 'Test Kitchen plugins for testing Terraform projects'
 
-  specification.version = Terraform::VERSION
+  specification.version = ::Terraform::PROJECT_VERSION
 
   specification.email = 'kitchen-terraform@newcontext.com'
 
@@ -68,5 +68,5 @@ Gem::Specification.new do |specification|
   specification.requirements = ['Terraform >= 0.6.0, < 0.8.0']
 
   specification.signing_key =
-    File.expand_path '~/.gem/ncs-alane-private_key.pem'
+    :: File.expand_path '~/.gem/ncs-alane-private_key.pem'
 end
