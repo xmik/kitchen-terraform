@@ -14,44 +14,57 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'forwardable'
+require 'hashie/dash'
+require 'hashie/extensions/dash/coercion'
+require 'set'
+require_relative 'group_attributes'
+
 module Terraform
   # Group of Terraform server instances to be verified
-  class Group
-    def each_attribute(&block)
-      data[:attributes].dup.each_pair(&block)
+  class Group < ::Hashie::Dash
+    extend ::Forwardable
+
+    include ::Hashie::Extensions::Dash::Coercion
+
+    def_delegator :attributes, :resolve, :resolve_attributes
+
+    property :attributes, coerce: ::Terraform::GroupAttributes,
+                          default: ::Terraform::GroupAttributes.new
+
+    property :controls, coerce: ::Array[::String], default: []
+
+    property :hostname, coerce: ::String
+
+    property :hostnames, coerce: ::String, default: ''
+
+    property :name, coerce: ::String, required: true
+
+    property :port
+
+    coerce_key :port, ->(value) { Integer value }
+
+    property :username, coerce: ::String
+
+    def resolve_hostnames(resolver:)
+      resolver.resolve group: self, hostnames: hostnames
     end
 
-    def evaluate(verifier:)
-      verifier.merge options: options
-      verifier.resolve_attributes group: self
-      verifier.resolve_hostnames group: self do |hostname|
-        verifier.info "Verifying host '#{hostname}' of group '#{data[:name]}'"
-        verifier.merge options: { host: hostname }
-        verifier.execute
+    def store_hostname(value:)
+      resolved_hostnames.add value
+    end
+
+    def with_each_hostname
+      resolved_hostnames.each do |hostname|
+        self[:hostname] = hostname
+        yield self
       end
-    end
-
-    def hostnames
-      data[:hostnames]
-    end
-
-    def store_attribute(key:, value:)
-      data[:attributes][key] = value
     end
 
     private
 
-    attr_accessor :data
-
-    def initialize(data:)
-      self.data = data
-    end
-
-    def options
-      {
-        attributes: data[:attributes], controls: data[:controls],
-        port: data[:port], user: data[:username]
-      }
+    def resolved_hostnames
+      @resolved_hostnames ||= ::Set.new
     end
   end
 end
