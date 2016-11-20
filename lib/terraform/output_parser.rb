@@ -14,32 +14,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'forwardable'
-require 'rubygems/version'
+require 'json'
 
 module Terraform
-  # Version of Terraform
-  class Version
-    extend ::Forwardable
-
-    def_delegator :value, :approximate_recommendation, :major_minor
-
-    def ==(other)
-      major_minor == other.major_minor
+  # A parser for output command values
+  class OutputParser
+    def iterate_parsed_output(&block)
+      Array(parsed_output)
+        .each { |list_value| list_value.split(',').each(&block) }
     end
 
-    alias eql? ==
-
-    def to_s
-      "v#{value}"
+    def parsed_output
+      ::JSON.parse(value).fetch 'value'
+    rescue ::JSON::ParserError
+      value
     end
 
     private
 
-    attr_accessor :value, :version
+    attr_accessor :value
 
     def initialize(value:)
-      self.value = ::Gem::Version.create value.slice(/v?(\d+(\.\d+)*)/, 1)
+      self.value = value
     end
   end
 end
