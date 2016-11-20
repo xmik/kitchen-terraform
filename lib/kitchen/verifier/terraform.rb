@@ -15,65 +15,62 @@
 # limitations under the License.
 
 require 'kitchen/verifier/inspec'
+require 'terraform/client'
 require 'terraform/configurable'
+require 'terraform/group_attributes_resolver'
+require 'terraform/group_hostnames_resolver'
 require 'terraform/groups_config'
 
 module Kitchen
   module Verifier
     # Runs tests post-converge to confirm that instances in the Terraform state
     # are in an expected state
-    class Terraform < Inspec
-      include ::Terraform::Configurable
+    class Terraform < ::Kitchen::Verifier::Inspec
+      extend ::Terraform::GroupsConfig
 
-      include ::Terraform::GroupsConfig
+      include ::Terraform::Configurable
 
       kitchen_verifier_api_version 2
 
       def call(state)
-        merge options: runner_options(transport, state)
-        config[:groups].each { |group| group.evaluate verifier: self }
-      end
-
-      def execute
-        ::Inspec::Runner.new(inspec_runner_options).tap do |inspec_runner|
-          add_targets inspec_runner: inspec_runner
-          verify inspec_runner: inspec_runner
+        resolve_groups
+        groups.each_with_each_hostname do |group|
+          prepare group: group
+          super
         end
-      end
-
-      def merge(options:)
-        inspec_runner_options.merge! options
-      end
-
-      def resolve_attributes(group:)
-        group.each_attribute do |key, output_name|
-          group.store_attribute key: key.to_s,
-                                value: driver.output_value(name: output_name)
-        end
-      end
-
-      def resolve_hostnames(group:, &block)
-        driver.output_value list: true, name: group.hostnames, &block
       end
 
       private
 
-      attr_accessor :inspec_runner_options
+      attr_accessor :group
 
-      def add_targets(inspec_runner:)
-        collect_tests.each { |test| inspec_runner.add_target test }
+      def client
+        @client ||=
+          ::Terraform::Client.new config: provisioner, logger: debug_logger
       end
 
-      def initialize(conf = {}, inspec_runner_options: {})
-        super conf
-        self.inspec_runner_options = inspec_runner_options
+      def groups
+        config[:groups]
       end
 
-      def verify(inspec_runner:)
-        inspec_runner.run.tap do |exit_code|
-          raise InstanceFailure, "Inspec Runner returns #{exit_code}" unless
-            exit_code.zero?
-        end
+      def prepare(group:)
+        info "Verifying host '#{group[:hostname]}' of group '#{group[:name]}'"
+        self.group = group
+        config[:attributes] = group[:attributes]
+      end
+
+      def resolve_groups
+        groups.resolve_attributes(
+          resolver: ::Terraform::GroupAttributesResolver.new(client: client)
+        )
+        groups.resolve_hostnames(
+          resolver: ::Terraform::GroupHostnamesResolver.new(client: client)
+        )
+      end
+
+      def runner_options(transport, state = {})
+        super.merge controls: group[:controls], host: group[:hostname],
+                    port: group[:port], user: group[:username]
       end
     end
   end
