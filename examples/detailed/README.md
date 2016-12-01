@@ -41,10 +41,8 @@ The driver has no configuration options.
 
 ### Provisioner
 
-The provisioner is configured to use a [variables file] to provide some
-of the variables required by the example module.
-
-[variable file]: test/fixtures/credentials.tfvars
+The provisioner is configured to use a test fixture module based on the
+installed version of Terraform.
 
 ### Transport
 
@@ -90,8 +88,6 @@ Before continuing, review the instructions on configuring the
 
 ```yaml
 ---
-provisioner:
-  directory: test/fixtures/<version of Terraform installed>
 transport:
   ssh_key: <pathname/of/private/ssh/key>
 suites:
