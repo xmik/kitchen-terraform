@@ -3,6 +3,7 @@ driver:
   name: terraform
 provisioner:
   name: terraform
+  parallelism: 4
   variable_files:
     - test/fixtures/credentials.tfvars
 transport:

@@ -41,8 +41,9 @@ The driver has no configuration options.
 
 ### Provisioner
 
-The provisioner is configured to use a [variables file] to provide some
-of the variables required by the example module.
+The provisioner is configured to run 4 concurrent operations and to use a
+[variables file] to provide some of the variables required by the example
+module.
 
 [variable file]: test/fixtures/credentials.tfvars
 
