@@ -1,5 +1,7 @@
 # kitchen-terraform
 
+![kitchen-terraform logo](assets/logo.svg)
+
 kitchen-terraform is a set of [Test Kitchen] plugins for testing
 [Terraform configuration].
 
