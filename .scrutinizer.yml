@@ -3,6 +3,7 @@
 build:
   environment:
     postgresql: false
+    redis: false
     ruby: '2.3.1'
 
 checks:
