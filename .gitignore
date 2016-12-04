@@ -1,7 +1,6 @@
 **/.bundle/
 **/Gemfile.lock
 *.gem
-coverage/
 examples/detailed/.kitchen.local.yml
 examples/detailed/.kitchen/
 examples/detailed/.terraform/

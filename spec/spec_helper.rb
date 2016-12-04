@@ -14,6 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'scrutinizer'
+
+::Scrutinizer::Ocular.watch!
+
 RSpec.configure do |configuration|
   configuration.disable_monkey_patching!
 

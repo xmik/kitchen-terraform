@@ -49,7 +49,7 @@ Gem::Specification.new do |specification|
 
   specification.add_development_dependency 'rubycritic', '~> 2.9'
 
-  specification.add_development_dependency 'simplecov', '~> 0.11', '>= 0.11.2'
+  specification.add_development_dependency 'scrutinizer-ocular', '~> 1.0'
 
   specification.add_runtime_dependency 'inspec', '~> 1.0'
 
