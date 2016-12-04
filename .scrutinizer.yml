@@ -1,4 +1,4 @@
-%https://scrutinizer-ci.com/g/newcontext-oss/kitchen-terraform/
+# https://scrutinizer-ci.com/g/newcontext-oss/kitchen-terraform/
 ---
 build:
   environment:
