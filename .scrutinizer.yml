@@ -5,6 +5,8 @@ build:
     postgresql: false
     redis: false
     ruby: '2.3.1'
+    variables:
+      SCRUTINIZER_REPOSITORY: newcontext-oss/kitchen-terraform
 
 checks:
   ruby: true
