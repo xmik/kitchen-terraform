@@ -1,6 +1,4 @@
-# kitchen-terraform
-
-![kitchen-terraform logo](assets/logo.png)
+# ![kitchen-terraform logo](assets/logo.png) kitchen-terraform
 
 kitchen-terraform is a set of [Test Kitchen] plugins for testing
 [Terraform configuration].
